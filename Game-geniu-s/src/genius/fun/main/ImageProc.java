@@ -1,6 +1,3 @@
-/**
- * 
- */
 
 package genius.fun.main;
 

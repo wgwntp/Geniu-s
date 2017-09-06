@@ -10,10 +10,11 @@ import java.io.FileOutputStream;
 
 import javax.imageio.ImageIO;
 
+import genius.fun.action.SingleAction;
+import genius.fun.action.TeamAction;
 import genius.fun.main.Dto;
+import genius.fun.main.DtoP2;
 import genius.fun.main.ImageProc;
-import genius.fun.win32.Mouse;
-import genius.fun.win32.Point;
 import genius.fun.win32.Window;
 
 /**
@@ -23,11 +24,12 @@ import genius.fun.win32.Window;
 
 public class CenterControl {
 	private Dto dto;
+	private DtoP2 dtoP2;
 	private ImageProc proc;
-	private int sleepTime = 2000;
 	public CenterControl() {
 		proc = new ImageProc();
 		dto = new Dto(proc);
+		dtoP2 = new DtoP2(proc);
 	}
 	
 	public void start() {
@@ -35,54 +37,59 @@ public class CenterControl {
 		if (hwnd <= 0) {
 			return;
 		}
+		SingleAction single = new SingleAction(dto, proc);
 		while (true) {
 			try{
-				yhSelf(hwnd);
-				Thread.sleep(sleepTime);
+				single.yhSelf(hwnd);
+				Thread.sleep(single.getSleepTime());
 			} catch(Exception e){
 				e.printStackTrace();
 			}
 		}
 	}
 	
-	private void yhSelf(int hwnd) {
-		try {
-			File f = File.createTempFile("snapshoot", ".bmp");
-			//System.out.println(f.getAbsolutePath());
-			// 写出位图
-			BufferedImage buffImage = Window.getImage(hwnd);
-			if (buffImage == null) {
-				f.delete();
+	public void startTeam() {
+		P1Thread p1 = new P1Thread();
+		p1.start();
+		P2Thread p2 = new P2Thread();
+		p2.start();
+	}
+	
+	class P1Thread extends Thread {
+		@Override
+		public void run() {
+			int hwnd = Window.getHwnd("海马玩模拟器 0.10.6 Beta");
+			if (hwnd <= 0) {
 				return;
 			}
-			FileOutputStream out = new FileOutputStream(f);
-			ImageIO.write(buffImage, "bmp", out);
-			int type = dto.getUIType(f.getAbsolutePath());
-			if(type == -1) {
-				out.close();
-				f.delete();
-				return;
+			TeamAction team = new TeamAction(dto,dtoP2);
+			while (true) {
+				try{
+					team.p1Action(hwnd);
+					Thread.sleep(team.getP1SleepTime());
+				} catch(Exception e){
+					e.printStackTrace();
+				}
 			}
-			System.out.println("TypeMatch : " + type);
-			String tempPath = Dto.typeToTemplate.get(type);
-			if (tempPath.equals("ever")) {
-				Mouse.click(hwnd, 500, 500);
-			} else {
-				Point clickPoint = proc.imgMatch(new String[]{f.getAbsolutePath(), tempPath});
-				Mouse.click(hwnd, clickPoint.x, clickPoint.y);
-			}
-			out.close();
-			f.delete();
-			if(type == 4 || type == 5) {
-				sleepTime = 10000;
-			} else {
-				sleepTime = 2000;
-			}
-		} catch(Exception e) {
-			e.printStackTrace();
 		}
 	}
 	
-	
-
+	class P2Thread extends Thread {
+		@Override
+		public void run() {
+			int hwnd = Window.getHwnd("海马玩模拟器_1 0.10.6 Beta");
+			if (hwnd <= 0) {
+				return;
+			}
+			TeamAction team = new TeamAction(dto,dtoP2);
+			while (true) {
+				try{
+					Thread.sleep(team.getP2SleepTime());
+					team.p2Action(hwnd);
+				} catch(Exception e){
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 }

@@ -127,7 +127,7 @@ public class JavaCVUtil {
 		return matcher.find();
 	}
 
-	public static genius.fun.win32.Point imgMatch(String[] args) {
+	public static void imgMatch(String[] args) {
 		// read in image default colors
 		IplImage baseImage = cvLoadImage(args[0]);
 		cvSetImageROI(baseImage, cvRect(0,0,baseImage.width(),baseImage.height() - 60));
@@ -147,18 +147,15 @@ public class JavaCVUtil {
 		Point min = new Point();
 		Point max = new Point();
 		minMaxLoc(result, minVal, maxVal, min, max, null);
-		genius.fun.win32.Point clickPoint = new genius.fun.win32.Point();
-		clickPoint.x = ((max.x() + (max.x() + template.cols())) / 2);
-		clickPoint.y = ((max.y() + (max.y() + template.rows())) / 2);
-//		rectangle(sourceColor,
-//				new Rect(max.x(), max.y(), template.cols(), template.rows()),
-//				randColor(), 2, 0, 0);
-//
-//		imshow("Original marked", sourceColor);
-//		imshow("Ttemplate", template);
-//		imshow("Results matrix", result);
-//		waitKey(0);
-//		destroyAllWindows();
+		rectangle(sourceColor,
+				new Rect(max.x(), max.y(), template.cols(), template.rows()),
+				randColor(), 2, 0, 0);
+
+		imshow("Original marked", sourceColor);
+		imshow("Ttemplate", template);
+		imshow("Results matrix", result);
+		waitKey(0);
+		destroyAllWindows();
 		baseImage.release();
 		sourceColor.release();
 		sourceGrey.release();
@@ -168,7 +165,6 @@ public class JavaCVUtil {
 		sourceColor = null;
 		sourceGrey = null;
 		result = null;
-		return clickPoint;
 	}
 
 	// some usefull things.
@@ -250,7 +246,8 @@ public class JavaCVUtil {
 		return hist;
 	}
 
-//	public static void main(String[] args) {
-//		imgMatch(new String[]{"UIType/5.png", "template/t_zb.png"});
-//	}
+	public static void main(String[] args) {
+		imgMatch(new String[]{"UIType/9.png", "template/t_cj.png"});
+		//System.out.println(HistMatch("UIType/11.png", "UIType/11.png"));
+	}
 }
