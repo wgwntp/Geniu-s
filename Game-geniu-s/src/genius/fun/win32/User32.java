@@ -12,5 +12,4 @@ public interface User32 extends StdCallLibrary{
 	int FindWindowA(String a,String b);
 	
 	int GetWindowRect(int hwnd,Rect r);
-	
 }

@@ -15,6 +15,7 @@ import genius.fun.action.TeamAction;
 import genius.fun.main.Dto;
 import genius.fun.main.DtoP2;
 import genius.fun.main.ImageProc;
+import genius.fun.win32.Mouse;
 import genius.fun.win32.Window;
 
 /**
@@ -84,8 +85,10 @@ public class CenterControl {
 			TeamAction team = new TeamAction(dto,dtoP2);
 			while (true) {
 				try{
+					Mouse.click(hwnd, 84, 181);
 					Thread.sleep(team.getP2SleepTime());
-					team.p2Action(hwnd);
+					Mouse.click(hwnd, 664, 352);
+					Thread.sleep(team.getP2SleepTime());
 				} catch(Exception e){
 					e.printStackTrace();
 				}

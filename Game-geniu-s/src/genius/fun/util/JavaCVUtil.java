@@ -150,7 +150,10 @@ public class JavaCVUtil {
 		rectangle(sourceColor,
 				new Rect(max.x(), max.y(), template.cols(), template.rows()),
 				randColor(), 2, 0, 0);
-
+		genius.fun.win32.Point clickPoint = new genius.fun.win32.Point();
+		clickPoint.x = ((max.x() + (max.x() + template.cols())) / 2);
+		clickPoint.y = ((max.y() + (max.y() + template.rows())) / 2);
+		System.out.println("x : " + clickPoint.x + " y : " + clickPoint.y);
 		imshow("Original marked", sourceColor);
 		imshow("Ttemplate", template);
 		imshow("Results matrix", result);
@@ -247,7 +250,7 @@ public class JavaCVUtil {
 	}
 
 	public static void main(String[] args) {
-		imgMatch(new String[]{"UIType/9.png", "template/t_cj.png"});
+		imgMatch(new String[]{"UIType/P2/2.png", "template/t_zb.png"});
 		//System.out.println(HistMatch("UIType/11.png", "UIType/11.png"));
 	}
 }

@@ -30,7 +30,7 @@ public class TeamAction {
 	private int beginType = 0;
 
 	int p1SleepTime = 3000;
-	int p2SleepTime = 8000;
+	int p2SleepTime = 4000;
 
 	public TeamAction(Dto dto,DtoP2 dtoP2) {
 		this.dto = dto;
@@ -124,7 +124,7 @@ public class TeamAction {
 			e.printStackTrace();
 		}
 	}
-
+	
 	/**
 	 * getter method
 	 * @return the p1SleepTime
