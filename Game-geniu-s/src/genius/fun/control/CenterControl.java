@@ -30,6 +30,7 @@ public class CenterControl {
 	public CenterControl() {
 		proc = new ImageProc();
 		dto = new Dto(proc);
+		dto.init();
 		dtoP2 = new DtoP2(proc);
 	}
 	
@@ -42,6 +43,38 @@ public class CenterControl {
 		while (true) {
 			try{
 				single.yhSelf(hwnd);
+				Thread.sleep(single.getSleepTime());
+			} catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void startSingleYYH() {
+		int hwnd = Window.getHwnd("海马玩模拟器 0.10.6 Beta");
+		if (hwnd <= 0) {
+			return;
+		}
+		SingleAction single = new SingleAction(dto, proc);
+		while (true) {
+			try{
+				single.yyhSelf(hwnd);
+				Thread.sleep(single.getSleepTime());
+			} catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void startSingleYL() {
+		int hwnd = Window.getHwnd("海马玩模拟器 0.10.6 Beta");
+		if (hwnd <= 0) {
+			return;
+		}
+		SingleAction single = new SingleAction(dto, proc);
+		while (true) {
+			try{
+				single.ylSelf(hwnd);
 				Thread.sleep(single.getSleepTime());
 			} catch(Exception e){
 				e.printStackTrace();

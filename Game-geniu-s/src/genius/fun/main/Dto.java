@@ -4,8 +4,13 @@
 
 package genius.fun.main;
 
+import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import org.bytedeco.javacpp.opencv_core.CvHistogram;
+import org.bytedeco.javacpp.opencv_core.IplImage;
 
 import genius.fun.util.JavaCVUtil;
 
@@ -34,6 +39,15 @@ public class Dto {
 	private static int TYPE_T_SB = 16;
 	private static int TYPE_T_SBJX = 17;
 	private static int TYPE_T_SL = 18;
+	private static int TYPE_YYH = 19;
+	private static int TYPE_YYH_ZB = 20;
+	private static int TYPE_YYH_SL = 21;
+	private static int TYPE_YYH_SB = 22;
+	private static int TYPE_YL_XZ = 23;
+	private static int TYPE_YL_TZSL = 24;
+	private static int TYPE_YL_ZB = 25;
+	private static int TYPE_YL_SL = 26;
+	private static int TYPE_YL_SB = 27;
 	
 	public static int BEGIN_SINGLE_YH = 4;
 	public static int END_SINGLE_YH = 7;
@@ -41,7 +55,13 @@ public class Dto {
 	public static int BEGIN_TEAM_YH = 12;
 	public static int END_TEAM_YH = 18;
 	
-	private static String[] uiImgPath = {
+	public static int BEGIN_SINGLE_YYH = 19;
+	public static int END_SINGLE_YYH = 22;
+	
+	public static int BEGIN_SINGLE_YL = 24;
+	public static int END_SINGLE_YL = 27;
+	
+	private String[] uiImgPath = {
 			"UIType/1.png",
 			"UIType/2.png",
 			"UIType/3.png",
@@ -59,11 +79,24 @@ public class Dto {
 			"UIType/15.png",
 			"UIType/16.png",
 			"UIType/17.png",
-			"UIType/18.png"
+			"UIType/18.png",
+			"UIType/19.png",
+			"UIType/20.png",
+			"UIType/21.png",
+			"UIType/22.png",
+			"UIType/23.png",
+			"UIType/24.png",
+			"UIType/25.png",
+			"UIType/26.png",
+			"UIType/27.png",
 	};
+	
+	private Map<Integer, CvHistogram> uiImgHists = new HashMap<>();
 	
 	public static Map<Integer, String> typeToTemplate = new HashMap<>();
 	public static Map<Integer, String> typeToTemplateTeam = new HashMap<>();
+	public static Map<Integer, String> typeToSingleYYHTemplate = new HashMap<>();
+	public static Map<Integer, String> typeToSingleYLTemplate = new HashMap<>();
 	static {
 		typeToTemplate.put(TYPE_MAIN, "template/t_ts.png");
 		typeToTemplate.put(TYPE_TS, "template/t_yh.png");
@@ -88,6 +121,22 @@ public class Dto {
 		typeToTemplateTeam.put(TYPE_T_SB, "ever");
 		typeToTemplateTeam.put(TYPE_T_SBJX, "template/t_qd.png");
 		typeToTemplateTeam.put(TYPE_T_SL, "ever");
+		
+		typeToSingleYYHTemplate.put(TYPE_MAIN, "template/t_ts.png");
+		typeToSingleYYHTemplate.put(TYPE_TS, "template/t_yh.png");
+		typeToSingleYYHTemplate.put(TYPE_YH, "template/t_yyh.png");
+		typeToSingleYYHTemplate.put(TYPE_YYH, "template/t_yyhtz.png");
+		typeToSingleYYHTemplate.put(TYPE_YYH_ZB, "template/t_zb.png");
+		typeToSingleYYHTemplate.put(TYPE_YYH_SL, "ever");
+		typeToSingleYYHTemplate.put(TYPE_YYH_SB, "ever");
+		
+		typeToSingleYLTemplate.put(TYPE_MAIN, "template/t_ts.png");
+		typeToSingleYLTemplate.put(TYPE_TS, "template/t_yl.png");
+		typeToSingleYLTemplate.put(TYPE_YL_XZ, "template/t_sl.png");
+		typeToSingleYLTemplate.put(TYPE_YL_TZSL, "template/t_yltz.png");
+		typeToSingleYLTemplate.put(TYPE_YL_ZB, "template/t_zb.png");
+		typeToSingleYLTemplate.put(TYPE_YL_SL, "ever");
+		typeToSingleYLTemplate.put(TYPE_YL_SB, "ever");
 	} 
 	
 	private ImageProc proc;
@@ -96,15 +145,28 @@ public class Dto {
 		this.proc = proc;
 	}
 	
-	public int getUIType(String path, int beginType, int endType) {
+	public void init() {
+		System.out.println("Initing ...");
+		long startTime = System.currentTimeMillis();
+		for (int i = 0; i < uiImgPath.length; ++i) {
+			uiImgHists.put(i, JavaCVUtil.getHueHistogram(cvLoadImage(uiImgPath[i])));
+		}
+		System.out.println("Init finish ! Time :" + (System.currentTimeMillis() - startTime) + "ms");
+	}
+
+	public int getUIType(IplImage baseImage, int beginType, int endType) {
+		if (uiImgHists.size() == 0) {
+			System.out.println("Please Init Dto !");
+			return -1;
+		}
 		int res = -1;
 		double highest = 0;
 		Map<Double, Integer> relation = new HashMap<>();
 		for(int i = beginType ; i < endType; ++i) {
-			double point = proc.histMatch(uiImgPath[i], path);
+			double point = proc.histMatch(uiImgHists.get(i), baseImage);
 			highest = Math.max(highest, point);
 			relation.put(point, i+1);
-			if (highest > 0.91) {
+			if (highest > 0.90) {
 				break;
 			}
 		}
@@ -115,12 +177,16 @@ public class Dto {
 			if (highest > 0.6) {
 				return res;
 			}
-		} else if(res == 11 || res ==14 || res == 18) {
+		} else if(res == 11 || res ==14 || res == 18 || res == 21 ||res == 22) {
 			if(highest > 0.75) {
 				return res;
 			}
+		} else if(res == 20) {
+			if (highest > 0.95) {
+				return res;
+			}
 		} else {
-			if (highest > 0.91) {
+			if (highest > 0.90) {
 				return res;
 			}
 		}

@@ -4,11 +4,15 @@
 
 package genius.fun.action;
 
+import static org.bytedeco.javacpp.opencv_core.cvRelease;
+import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 
 import javax.imageio.ImageIO;
+
+import org.bytedeco.javacpp.opencv_core.IplImage;
 
 import genius.fun.main.Dto;
 import genius.fun.main.DtoP2;
@@ -49,11 +53,14 @@ public class TeamAction {
 			}
 			FileOutputStream out = new FileOutputStream(f);
 			ImageIO.write(buffImage, "bmp", out);
-			int type = dto.getUIType(f.getAbsolutePath(), beginType,
+			IplImage baseImage = cvLoadImage(f.getAbsolutePath());
+			out.close();
+			f.delete();
+			
+			int type = dto.getUIType(baseImage, beginType,
 					Dto.END_TEAM_YH);
 			if (type == -1) {
-				out.close();
-				f.delete();
+				releaseImg(baseImage);
 				return;
 			}
 
@@ -67,14 +74,12 @@ public class TeamAction {
 			} else if (tempPath.indexOf("muti") == 0) {
 				String[] paths = tempPath.split("\\s");
 				for (int i = 1; i < paths.length; ++i) {
-					Point clickPoint = dto.getProc().imgMatch(
-							new String[] {f.getAbsolutePath(), paths[i] });
+					Point clickPoint = dto.getProc().imgMatch(baseImage, paths[i] );
 					Mouse.click(hwnd, clickPoint.x, clickPoint.y);
 					Thread.sleep(2000);
 				}
 			} else {
-				Point clickPoint = dto.getProc().imgMatch(
-						new String[] {f.getAbsolutePath(), tempPath });
+				Point clickPoint = dto.getProc().imgMatch(baseImage, tempPath );
 				Mouse.click(hwnd, clickPoint.x, clickPoint.y);
 			}
 			if (type == 12 || type == 13) {
@@ -82,8 +87,7 @@ public class TeamAction {
 			} else {
 				p1SleepTime = 3000;
 			}
-			out.close();
-			f.delete();
+			releaseImg(baseImage);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -101,25 +105,22 @@ public class TeamAction {
 			}
 			FileOutputStream out = new FileOutputStream(f);
 			ImageIO.write(buffImage, "bmp", out);
-			int type = dtoP2.getUIType(f.getAbsolutePath());
+			IplImage baseImage = cvLoadImage(f.getAbsolutePath());
+			out.close();
+			f.delete();
+			int type = dtoP2.getUIType(baseImage);
 			if (type == -1) {
-				out.close();
-				f.delete();
+				releaseImg(baseImage);
 				return;
 			}
 			String tempPath = DtoP2.typeToTemplateP2.get(type);
 			if (tempPath.equals("ever")) {
 				Mouse.click(hwnd, 100, 100);
 			} else {
-				Point clickPoint = dtoP2.getProc().imgMatch(
-						new String[] {f.getAbsolutePath(), tempPath });
+				Point clickPoint = dtoP2.getProc().imgMatch(baseImage, tempPath);
 				Mouse.click(hwnd, clickPoint.x, clickPoint.y);
 			}
-			
-			//p1SleepTime = 10000;
-	
-			out.close();
-			f.delete();
+			releaseImg(baseImage);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -159,6 +160,12 @@ public class TeamAction {
 	
 	public void setP2SleepTime(int p2SleepTime) {
 		this.p2SleepTime = p2SleepTime;
+	}
+	
+	public void releaseImg(IplImage img ) {
+		img.release();
+		cvRelease(img);
+		img = null;
 	}
 	
 }

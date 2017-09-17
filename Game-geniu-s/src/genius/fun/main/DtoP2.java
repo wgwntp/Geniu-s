@@ -4,8 +4,15 @@
 
 package genius.fun.main;
 
+import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import org.bytedeco.javacpp.opencv_core.CvHistogram;
+import org.bytedeco.javacpp.opencv_core.IplImage;
+
+import genius.fun.util.JavaCVUtil;
 
 /**
  * @author Lie
@@ -26,6 +33,8 @@ public class DtoP2 {
 			"UIType/P2/4.png",
 			"UIType/P2/5.png"
 	};
+	private Map<Integer, CvHistogram> uiImgHists = new HashMap<>();
+	
 	
 	public static Map<Integer, String> typeToTemplateP2 = new HashMap<>();
 	
@@ -43,12 +52,22 @@ private ImageProc proc;
 		this.proc = proc;
 	}
 	
-	public int getUIType(String path) {
+	public void init() {
+		System.out.println("Initing ...");
+		long startTime = System.currentTimeMillis();
+		for (int i = 0; i < p2UiImgPath.length; ++i) {
+			uiImgHists.put(i, JavaCVUtil.getHueHistogram(cvLoadImage(p2UiImgPath[i])));
+		}
+		System.out.println("Init finish ! Time :" + (System.currentTimeMillis() - startTime) + "ms");
+	}
+	
+	
+	public int getUIType(IplImage baseImage) {
 		int res = -1;
 		double highest = 0;
 		Map<Double, Integer> relation = new HashMap<>();
 		for(int i = 0 ; i < p2UiImgPath.length; ++i) {
-			double point = proc.histMatch(p2UiImgPath[i], path);
+			double point = proc.histMatch(uiImgHists.get(i), baseImage);
 			highest = Math.max(highest, point);
 			relation.put(point, i+1);
 			if (highest > 0.91) {
