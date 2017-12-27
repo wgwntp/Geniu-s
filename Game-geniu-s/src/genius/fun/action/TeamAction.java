@@ -9,6 +9,7 @@ import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 
@@ -43,6 +44,7 @@ public class TeamAction {
 
 	public void p1Action(int hwnd) {
 		try {
+			dto.setHwnd(hwnd);
 			File f = File.createTempFile("snapshoot", ".bmp");
 			// System.out.println(f.getAbsolutePath());
 			// 写出位图
@@ -63,6 +65,12 @@ public class TeamAction {
 				releaseImg(baseImage);
 				return;
 			}
+			
+			if (type == -2) {
+				beginType = 0;
+				releaseImg(baseImage);
+				return;
+			}
 
 			if (type < Dto.BEGIN_TEAM_YH) {
 				beginType = type;
@@ -70,7 +78,9 @@ public class TeamAction {
 
 			String tempPath = Dto.typeToTemplateTeam.get(type);
 			if (tempPath.equals("ever")) {
-				Mouse.click(hwnd, 100, 100);
+				Random random = new Random(System.currentTimeMillis());
+				int offset = random.nextInt() % 30;
+				Mouse.click(hwnd, 100 + offset, 100 + offset);
 			} else if (tempPath.indexOf("muti") == 0) {
 				String[] paths = tempPath.split("\\s");
 				for (int i = 1; i < paths.length; ++i) {
@@ -83,7 +93,7 @@ public class TeamAction {
 				Mouse.click(hwnd, clickPoint.x, clickPoint.y);
 			}
 			if (type == 12 || type == 13) {
-				p1SleepTime = 10000;
+				p1SleepTime = 5000;
 			} else {
 				p1SleepTime = 3000;
 			}
@@ -95,6 +105,7 @@ public class TeamAction {
 	
 	public void p2Action(int hwnd) {
 		try {
+			dtoP2.setHwnd(hwnd);
 			File f = File.createTempFile("snapshoot", ".bmp");
 			// System.out.println(f.getAbsolutePath());
 			// 写出位图
@@ -113,9 +124,12 @@ public class TeamAction {
 				releaseImg(baseImage);
 				return;
 			}
+			
 			String tempPath = DtoP2.typeToTemplateP2.get(type);
 			if (tempPath.equals("ever")) {
-				Mouse.click(hwnd, 100, 100);
+				Random random = new Random(System.currentTimeMillis());
+				int offset = random.nextInt() % 30;
+				Mouse.click(hwnd, 100 + offset, 100 + offset);
 			} else {
 				Point clickPoint = dtoP2.getProc().imgMatch(baseImage, tempPath);
 				Mouse.click(hwnd, clickPoint.x, clickPoint.y);

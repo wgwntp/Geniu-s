@@ -18,6 +18,8 @@ import static org.bytedeco.javacpp.opencv_imgproc.cvCompareHist;
 import static org.bytedeco.javacpp.opencv_imgproc.cvtColor;
 import static org.bytedeco.javacpp.opencv_imgproc.matchTemplate;
 
+import java.util.Random;
+
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.opencv_core.CvHistogram;
 import org.bytedeco.javacpp.opencv_core.IplImage;
@@ -57,8 +59,12 @@ public class ImageProc {
 		Point max = new Point();
 		minMaxLoc(result, minVal, maxVal, min, max, null);
 		genius.fun.win32.Point clickPoint = new genius.fun.win32.Point();
-		clickPoint.x = ((max.x() + (max.x() + template.cols())) / 2);
-		clickPoint.y = ((max.y() + (max.y() + template.rows())) / 2);
+		Random random = new Random(System.currentTimeMillis());
+		int offsetX = random.nextInt() % (template.cols() / 3);
+		int offsetY = random.nextInt() % (template.rows() / 3);
+		clickPoint.x = ((max.x() + (max.x() + template.cols())) / 2) + offsetX;
+		clickPoint.y = ((max.y() + (max.y() + template.rows())) / 2) + offsetY;
+		System.out.println("x : " + clickPoint.x + " y : " + clickPoint.y);
 		template.release();
 		template._deallocate();
 		sourceColor.release();

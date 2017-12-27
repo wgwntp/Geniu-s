@@ -32,6 +32,7 @@ public class CenterControl {
 		dto = new Dto(proc);
 		dto.init();
 		dtoP2 = new DtoP2(proc);
+		dtoP2.init();
 	}
 	
 	public void start() {
@@ -82,6 +83,37 @@ public class CenterControl {
 		}
 	}
 	
+	public void startSingleYLHB() {
+		int hwnd = Window.getHwnd("海马玩模拟器 0.10.6 Beta");
+		if (hwnd <= 0) {
+			return;
+		}
+		SingleAction single = new SingleAction(dto, proc);
+		while (true) {
+			try{
+				single.ylhbSelf(hwnd);
+				Thread.sleep(single.getSleepTime());
+			} catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void startSingleYLBZZ() {
+		int hwnd = Window.getHwnd("海马玩模拟器 0.10.6 Beta");
+		if (hwnd <= 0) {
+			return;
+		}
+		SingleAction single = new SingleAction(dto, proc);
+		while (true) {
+			try{
+				single.ylbzzSelf(hwnd);
+				Thread.sleep(single.getSleepTime());
+			} catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+	}
 	public void startTeam() {
 		P1Thread p1 = new P1Thread();
 		p1.start();
@@ -118,10 +150,12 @@ public class CenterControl {
 			TeamAction team = new TeamAction(dto,dtoP2);
 			while (true) {
 				try{
-					Mouse.click(hwnd, 84, 181);
-					Thread.sleep(team.getP2SleepTime());
-					Mouse.click(hwnd, 664, 352);
-					Thread.sleep(team.getP2SleepTime());
+					team.p2Action(hwnd);
+					Thread.sleep(3000);
+//					Mouse.click(hwnd, 84, 181);
+//					Thread.sleep(team.getP2SleepTime());
+//					Mouse.click(hwnd, 664, 352);
+//					Thread.sleep(team.getP2SleepTime());
 				} catch(Exception e){
 					e.printStackTrace();
 				}

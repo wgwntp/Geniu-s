@@ -147,7 +147,6 @@ public class JavaCVUtil {
 		Point min = new Point();
 		Point max = new Point();
 		minMaxLoc(result, minVal, maxVal, min, max, null);
-		System.out.println(maxVal + " " + minVal);
 		rectangle(sourceColor,
 				new Rect(max.x(), max.y(), template.cols(), template.rows()),
 				randColor(), 2, 0, 0);
@@ -282,7 +281,7 @@ public class JavaCVUtil {
 
 	public static void main(String[] args) {
 		//cvTemplateMatch(new String[]{"UIType/P2/2.png", "template/t_zb.png"});
-		imgMatch(new String[]{"UIType/2.png", "template/t_yl.png"});
+		imgMatch(new String[]{"UIType/101.png", "template/t_cj.png"});
 		//System.out.println(HistMatch("UIType/11.png", "UIType/11.png"));
 	}
 }

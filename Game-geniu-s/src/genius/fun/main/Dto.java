@@ -13,6 +13,8 @@ import org.bytedeco.javacpp.opencv_core.CvHistogram;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 
 import genius.fun.util.JavaCVUtil;
+import genius.fun.win32.Mouse;
+import genius.fun.win32.Point;
 
 /**
  * @author Lie
@@ -48,6 +50,15 @@ public class Dto {
 	private static int TYPE_YL_ZB = 25;
 	private static int TYPE_YL_SL = 26;
 	private static int TYPE_YL_SB = 27;
+	private static int TYPE_YL_TZHB = 28;
+	private static int TYPE_YL_HBZB = 29;
+	private static int TYPE_YL_HBSL = 30;
+	private static int TYPE_YL_HBSB = 31;
+	private static int TYPE_YL_TZBZZ = 32;
+	private static int TYPE_YL_BZZZB = 33;
+	private static int TYPE_YL_BZZSL = 34;
+	private static int TYPE_YL_BZZSB = 35;
+	
 	
 	public static int BEGIN_SINGLE_YH = 4;
 	public static int END_SINGLE_YH = 7;
@@ -58,8 +69,16 @@ public class Dto {
 	public static int BEGIN_SINGLE_YYH = 19;
 	public static int END_SINGLE_YYH = 22;
 	
-	public static int BEGIN_SINGLE_YL = 24;
-	public static int END_SINGLE_YL = 27;
+	public static int BEGIN_SINGLE_YLSL = 24;
+	public static int END_SINGLE_YLSL = 27;
+	
+	public static int BEGIN_SINGLE_YLHB = 28;
+	public static int END_SINGLE_YLHB = 31;
+	
+	public static int BEGIN_SINGLE_YLBZZ = 32;
+	public static int END_SINGLE_YLBZZ = 35;
+	
+	
 	
 	private String[] uiImgPath = {
 			"UIType/1.png",
@@ -89,6 +108,14 @@ public class Dto {
 			"UIType/25.png",
 			"UIType/26.png",
 			"UIType/27.png",
+			"UIType/28.png",
+			"UIType/29.png",
+			"UIType/30.png",
+			"UIType/31.png",
+			"UIType/32.png",
+			"UIType/33.png",
+			"UIType/34.png",
+			"UIType/35.png",
 	};
 	
 	private Map<Integer, CvHistogram> uiImgHists = new HashMap<>();
@@ -96,7 +123,9 @@ public class Dto {
 	public static Map<Integer, String> typeToTemplate = new HashMap<>();
 	public static Map<Integer, String> typeToTemplateTeam = new HashMap<>();
 	public static Map<Integer, String> typeToSingleYYHTemplate = new HashMap<>();
-	public static Map<Integer, String> typeToSingleYLTemplate = new HashMap<>();
+	public static Map<Integer, String> typeToSingleYL1Template = new HashMap<>();
+	public static Map<Integer, String> typeToSingleYL2Template = new HashMap<>();
+	public static Map<Integer, String> typeToSingleYL3Template = new HashMap<>();
 	static {
 		typeToTemplate.put(TYPE_MAIN, "template/t_ts.png");
 		typeToTemplate.put(TYPE_TS, "template/t_yh.png");
@@ -130,17 +159,38 @@ public class Dto {
 		typeToSingleYYHTemplate.put(TYPE_YYH_SL, "ever");
 		typeToSingleYYHTemplate.put(TYPE_YYH_SB, "ever");
 		
-		typeToSingleYLTemplate.put(TYPE_MAIN, "template/t_ts.png");
-		typeToSingleYLTemplate.put(TYPE_TS, "template/t_yl.png");
-		typeToSingleYLTemplate.put(TYPE_YL_XZ, "template/t_sl.png");
-		typeToSingleYLTemplate.put(TYPE_YL_TZSL, "template/t_yltz.png");
-		typeToSingleYLTemplate.put(TYPE_YL_ZB, "template/t_zb.png");
-		typeToSingleYLTemplate.put(TYPE_YL_SL, "ever");
-		typeToSingleYLTemplate.put(TYPE_YL_SB, "ever");
+		typeToSingleYL1Template.put(TYPE_MAIN, "template/t_ts.png");
+		typeToSingleYL1Template.put(TYPE_TS, "template/t_yl.png");
+		typeToSingleYL1Template.put(TYPE_YL_XZ, "template/t_sl.png");
+		typeToSingleYL1Template.put(TYPE_YL_TZSL, "template/t_yltz.png");
+		typeToSingleYL1Template.put(TYPE_YL_ZB, "template/t_zb.png");
+		typeToSingleYL1Template.put(TYPE_YL_SL, "ever");
+		typeToSingleYL1Template.put(TYPE_YL_SB, "ever");
+		
+		typeToSingleYL3Template.put(TYPE_MAIN, "template/t_ts.png");
+		typeToSingleYL3Template.put(TYPE_TS, "template/t_yl.png");
+		typeToSingleYL3Template.put(TYPE_YL_XZ, "template/t_hb.png");
+		typeToSingleYL3Template.put(TYPE_YL_TZHB, "template/t_yltz.png");
+		typeToSingleYL3Template.put(TYPE_YL_HBZB, "template/t_zb.png");
+		typeToSingleYL3Template.put(TYPE_YL_HBSL, "ever");
+		typeToSingleYL3Template.put(TYPE_YL_HBSB, "ever");
+		
+		typeToSingleYL2Template.put(TYPE_MAIN, "template/t_ts.png");
+		typeToSingleYL2Template.put(TYPE_TS, "template/t_yl.png");
+		typeToSingleYL2Template.put(TYPE_YL_XZ, "template/t_bzz.png");
+		typeToSingleYL2Template.put(TYPE_YL_TZBZZ, "template/t_yltz.png");
+		typeToSingleYL2Template.put(TYPE_YL_BZZZB, "template/t_zb.png");
+		typeToSingleYL2Template.put(TYPE_YL_BZZSL, "ever");
+		typeToSingleYL2Template.put(TYPE_YL_BZZSB, "ever");
 	} 
 	
 	private ImageProc proc;
+	private int hwnd;
+	private int count = 0;
 	
+	public void setHwnd(int hwnd) {
+		this.hwnd = hwnd;
+	}
 	public Dto(ImageProc proc) {
 		this.proc = proc;
 	}
@@ -175,21 +225,54 @@ public class Dto {
 		//
 		if (res == 1 || res == 2 || res == 6) {
 			if (highest > 0.6) {
+				count = 0;
 				return res;
 			}
 		} else if(res == 11 || res ==14 || res == 18 || res == 21 ||res == 22) {
 			if(highest > 0.75) {
+				count = 0;
+				return res;
+			}
+		} else if(res == 16 || res == 17) {
+			if (highest > 0.69) {
+				count = 0;
 				return res;
 			}
 		} else if(res == 20) {
 			if (highest > 0.95) {
+				count = 0;
+				return res;
+			}
+		}else if(res == 28) {
+			if (highest > 0.84) {
+				count = 0;
 				return res;
 			}
 		} else {
-			if (highest > 0.90) {
+			if (highest > 0.859) {
+				count = 0;
 				return res;
 			}
 		}
+		
+		if (count > 1) {
+			count = 0;
+			if (res != 13) {
+				if (hwnd != 0) {
+					Point clickPoint =proc.imgMatch(baseImage, "template/t_jsxsfy.png");
+					Mouse.click(hwnd, clickPoint.x, clickPoint.y);
+				}
+				return -2;
+			} else if(res == 13 && highest < 0.7){
+				if (hwnd != 0) {
+					Point clickPoint =proc.imgMatch(baseImage, "template/t_jsxsfy.png");
+					Mouse.click(hwnd, clickPoint.x, clickPoint.y);
+				}
+				return -2;
+			}
+		}
+		
+		count ++;
 		return -1;
 	}
 

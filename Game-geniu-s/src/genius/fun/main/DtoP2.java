@@ -13,6 +13,8 @@ import org.bytedeco.javacpp.opencv_core.CvHistogram;
 import org.bytedeco.javacpp.opencv_core.IplImage;
 
 import genius.fun.util.JavaCVUtil;
+import genius.fun.win32.Mouse;
+import genius.fun.win32.Point;
 
 /**
  * @author Lie
@@ -46,7 +48,15 @@ public class DtoP2 {
 		typeToTemplateP2.put(P2_TYPE_T_SB, "ever");
 	}
 	
-private ImageProc proc;
+	private ImageProc proc;
+	
+	private int hwnd;
+	
+	private int count = 0;
+	
+	public void setHwnd(int hwnd) {
+		this.hwnd = hwnd;
+	}
 	
 	public DtoP2(ImageProc proc) {
 		this.proc = proc;
@@ -78,19 +88,38 @@ private ImageProc proc;
 		System.out.println("P2 > Match : " + res + " Point : " + highest);
 		//
 		if (res == 1) {
-			if(highest > 0.97) {
+			if(highest > 0.90) {
+				count= 0;
 				return res;
 			}
-		} else if(res == 4) {
-			if(highest > 0.75) {
+		} else if(res == 4 || res == 5) {
+			if(highest > 0.69) {
+				count= 0;
 				return res;
 			}
 		}else {
 			if (highest > 0.91) {
+				count= 0;
 				return res;
 			}
 		}
 		
+		if (count > 1) {
+			if (res != 2) {
+				if (hwnd != 0) {
+					Point clickPoint =proc.imgMatch(baseImage, "template/t_jsxsfy.png");
+					Mouse.click(hwnd, clickPoint.x, clickPoint.y);
+				}
+			}
+			
+			if (res == 2 && highest < 0.7) {
+				if (hwnd != 0) {
+					Point clickPoint =proc.imgMatch(baseImage, "template/t_jsxsfy.png");
+					Mouse.click(hwnd, clickPoint.x, clickPoint.y);
+				}
+			}
+		}
+		count++;
 		return -1;
 	}
 	
