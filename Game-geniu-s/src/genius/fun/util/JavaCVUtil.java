@@ -140,7 +140,7 @@ public class JavaCVUtil {
 		Size size = new Size(sourceGrey.cols() - template.cols() + 1,
 				sourceGrey.rows() - template.rows() + 1);
 		Mat result = new Mat(size, CV_32FC1);
-		matchTemplate(sourceGrey, template, result, TM_CCORR_NORMED);
+		matchTemplate(sourceGrey, template, result, CV_TM_CCORR_NORMED);
 
 		DoublePointer minVal = new DoublePointer();
 		DoublePointer maxVal = new DoublePointer();
@@ -168,6 +168,36 @@ public class JavaCVUtil {
 		sourceColor = null;
 		sourceGrey = null;
 		result = null;
+	}
+	
+	private static void cvTemplateMatch(String[] args) {
+		IplImage src = cvLoadImage(args[0], 0);  
+	    IplImage tmp = cvLoadImage(args[1], 0);  
+	    IplImage result = cvCreateImage(cvSize(src.width() -tmp.width()+1,src.height()-tmp.height() + 1),IPL_DEPTH_32F,1);
+	    cvZero(result);
+
+	   // cvSetImageROI(src, new CvRect(370, 175, 624, 398));
+	    //cvSetImageROI(result, new CvRect(370, 175, 624 - tmp.width() + 1, 398 - tmp.height() + 1));
+
+	    cvMatchTemplate(src, tmp, result, CV_TM_CCORR);
+
+	    DoublePointer minVal = new DoublePointer();
+		DoublePointer maxVal = new DoublePointer();
+	    CvPoint minLoc = new CvPoint();
+	    CvPoint maxLoc = new CvPoint();
+
+	    cvMinMaxLoc(result, minVal, maxVal, minLoc, maxLoc,null);
+	    System.out.println(minVal + "" + maxVal + "" + result.highValue());
+	    CvPoint point = new CvPoint();
+	    point.x(maxLoc.x() + tmp.width());
+	    point.y(maxLoc.y() + tmp.height());
+	    
+	    cvRectangle(src, maxLoc, point, CvScalar.GREEN, 2, 8, 0);
+	    cvShowImage("Lena Image", src);
+	    cvWaitKey(0);
+	    cvReleaseImage(src);
+	    cvReleaseImage(tmp);
+	    cvReleaseImage(result);
 	}
 
 	// some usefull things.
@@ -215,7 +245,7 @@ public class JavaCVUtil {
 		return matchValue;
 	}
 
-	private static CvHistogram getHueHistogram(IplImage image) {
+	public static CvHistogram getHueHistogram(IplImage image) {
 		if (image == null || image.nChannels() < 1)
 			new Exception("Error!");
 
@@ -250,7 +280,8 @@ public class JavaCVUtil {
 	}
 
 	public static void main(String[] args) {
-		imgMatch(new String[]{"UIType/P2/2.png", "template/t_zb.png"});
+		//cvTemplateMatch(new String[]{"UIType/P2/2.png", "template/t_zb.png"});
+		imgMatch(new String[]{"UIType/101.png", "template/t_cj.png"});
 		//System.out.println(HistMatch("UIType/11.png", "UIType/11.png"));
 	}
 }

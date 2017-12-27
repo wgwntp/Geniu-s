@@ -4,7 +4,11 @@ import genius.fun.control.CenterControl;
 
 public class GeniusMain {
 	public static void main(String[] args) {
-			//new CenterControl().start();
-			new CenterControl().startTeam();
+			//new CenterControl().startSingleYYH();
+			//new CenterControl().startSingleYL();
+			new CenterControl().start();
+			//new CenterControl().startTeam();
+			//new CenterControl().startSingleYLHB();
+			//new CenterControl().startSingleYLBZZ();
 	}
 }

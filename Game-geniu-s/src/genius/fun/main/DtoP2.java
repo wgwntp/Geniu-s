@@ -4,8 +4,17 @@
 
 package genius.fun.main;
 
+import static org.bytedeco.javacpp.opencv_imgcodecs.cvLoadImage;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import org.bytedeco.javacpp.opencv_core.CvHistogram;
+import org.bytedeco.javacpp.opencv_core.IplImage;
+
+import genius.fun.util.JavaCVUtil;
+import genius.fun.win32.Mouse;
+import genius.fun.win32.Point;
 
 /**
  * @author Lie
@@ -26,6 +35,8 @@ public class DtoP2 {
 			"UIType/P2/4.png",
 			"UIType/P2/5.png"
 	};
+	private Map<Integer, CvHistogram> uiImgHists = new HashMap<>();
+	
 	
 	public static Map<Integer, String> typeToTemplateP2 = new HashMap<>();
 	
@@ -37,18 +48,36 @@ public class DtoP2 {
 		typeToTemplateP2.put(P2_TYPE_T_SB, "ever");
 	}
 	
-private ImageProc proc;
+	private ImageProc proc;
+	
+	private int hwnd;
+	
+	private int count = 0;
+	
+	public void setHwnd(int hwnd) {
+		this.hwnd = hwnd;
+	}
 	
 	public DtoP2(ImageProc proc) {
 		this.proc = proc;
 	}
 	
-	public int getUIType(String path) {
+	public void init() {
+		System.out.println("Initing ...");
+		long startTime = System.currentTimeMillis();
+		for (int i = 0; i < p2UiImgPath.length; ++i) {
+			uiImgHists.put(i, JavaCVUtil.getHueHistogram(cvLoadImage(p2UiImgPath[i])));
+		}
+		System.out.println("Init finish ! Time :" + (System.currentTimeMillis() - startTime) + "ms");
+	}
+	
+	
+	public int getUIType(IplImage baseImage) {
 		int res = -1;
 		double highest = 0;
 		Map<Double, Integer> relation = new HashMap<>();
 		for(int i = 0 ; i < p2UiImgPath.length; ++i) {
-			double point = proc.histMatch(p2UiImgPath[i], path);
+			double point = proc.histMatch(uiImgHists.get(i), baseImage);
 			highest = Math.max(highest, point);
 			relation.put(point, i+1);
 			if (highest > 0.91) {
@@ -59,19 +88,38 @@ private ImageProc proc;
 		System.out.println("P2 > Match : " + res + " Point : " + highest);
 		//
 		if (res == 1) {
-			if(highest > 0.97) {
+			if(highest > 0.90) {
+				count= 0;
 				return res;
 			}
-		} else if(res == 4) {
-			if(highest > 0.75) {
+		} else if(res == 4 || res == 5) {
+			if(highest > 0.69) {
+				count= 0;
 				return res;
 			}
 		}else {
 			if (highest > 0.91) {
+				count= 0;
 				return res;
 			}
 		}
 		
+		if (count > 1) {
+			if (res != 2) {
+				if (hwnd != 0) {
+					Point clickPoint =proc.imgMatch(baseImage, "template/t_jsxsfy.png");
+					Mouse.click(hwnd, clickPoint.x, clickPoint.y);
+				}
+			}
+			
+			if (res == 2 && highest < 0.7) {
+				if (hwnd != 0) {
+					Point clickPoint =proc.imgMatch(baseImage, "template/t_jsxsfy.png");
+					Mouse.click(hwnd, clickPoint.x, clickPoint.y);
+				}
+			}
+		}
+		count++;
 		return -1;
 	}
 	
