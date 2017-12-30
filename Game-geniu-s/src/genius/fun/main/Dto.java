@@ -239,7 +239,7 @@ public class Dto {
 				return res;
 			}
 		} else if(res == 20) {
-			if (highest > 0.95) {
+			if (highest > 0.94) {
 				count = 0;
 				return res;
 			}
